@@ -33,7 +33,6 @@ public class FieldTile : MonoBehaviour
         else {
             Water();
         }
-
     }
     
     private void PlantNewCrop(CropData cropData) {

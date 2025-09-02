@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -7,8 +10,13 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     [SerializeField] private int money;
     [SerializeField] private int cropInventory;
+    [SerializeField] private int potatoInventory;
     public CropData selectedCropToPlant;
     public event UnityAction OnNewDay;
+    [SerializeField] private TMP_Text statsText;
+    [SerializeField] private TMP_Dropdown dropdown;
+    private Dictionary<string, int> allCropsInventory = new Dictionary<string, int>() ;
+    [SerializeField] private CropData[] allCrops;
 
     private void Awake()
     {
@@ -17,35 +25,69 @@ public class GameManager : MonoBehaviour
         }
         instance = this;
     }
+    private void Start()
+    {      
+        dropdown.options.Clear();
+        for (int i = 0; i < allCrops.Length; i++) {
+            dropdown.options.Add(new TMP_Dropdown.OptionData(allCrops[i].name));
 
-    private void SetNewDay()
-    {
-        
+            allCropsInventory.Add(allCrops[i].name, 0);
+        }
+        allCropsInventory["Wheat"] = 2;
+        dropdown.onValueChanged.AddListener(delegate { OnDropdownChange(); });
+        UpdateText();
     }
-    private void OnPlantCrop(CropData cropData)
-    {
-        cropInventory--;
+
+    private void OnDropdownChange() {
+        selectedCropToPlant = allCrops[dropdown.value];
+        UpdateText();
     }
-    private void OnHarvestCrop(CropData cropData)
+    
+    public void SetNewDay()
+    {
+        currentDay++;
+        OnNewDay?.Invoke();
+        UpdateText();
+    }
+    public void OnPlantCrop(CropData cropData)
+    {
+        allCropsInventory[cropData.name]--;
+        UpdateText();
+    }
+
+    public void OnHarvestCrop(CropData cropData)
     {
         money += cropData.sellPrice;
-    }
-    private void PurchaseCrop(CropData cropData)
-    {
+        UpdateText();
 
+    }
+    public void PurchaseCrop(CropData cropData)
+    {
+       //cropInventory++;
+        allCropsInventory[cropData.name]++;
+        money -= cropData.purchasePrice;
+        UpdateText();
     }
     public bool CanPlatnCrop() {
 
-        return cropInventory > 0;
+        return allCropsInventory[selectedCropToPlant.name] > 0;
     }
 
     public void OnBuyCropButton(CropData cropData) {
 
+        if (!allCropsInventory.ContainsKey(cropData.name)) {
+            allCropsInventory.Add (cropData.name, 0);
+        }
+        
+
+        if (money >= cropData.purchasePrice) {
+            PurchaseCrop(cropData);
+        }
     }
 
-    private void UpdateText()
+    public void UpdateText()
     {
-        
+        statsText.text = $"Day: {currentDay} \nMoney: ${money} \n{selectedCropToPlant.name}: {allCropsInventory[selectedCropToPlant.name]}";
     }
 
     private void OnEnable()

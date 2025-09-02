@@ -19,10 +19,12 @@ public class Crop : MonoBehaviour
     }
 
     public void NEwDayCheck() {
+        daysSinceLastWatered++;
         if (daysSinceLastWatered > 3) {
             Destroy(gameObject);
-            UpdateCropSprite(); 
+            
         }
+        UpdateCropSprite();
 
     }
 
