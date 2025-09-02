@@ -37,7 +37,9 @@ public class FieldTile : MonoBehaviour
     }
     
     private void PlantNewCrop(CropData cropData) {
+        
         if (!isTilled) {
+            
             return;
         }
         currentCrop = Instantiate(cropPrefab, transform);

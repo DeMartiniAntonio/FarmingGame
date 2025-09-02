@@ -35,7 +35,8 @@ public class GameManager : MonoBehaviour
 
     }
     public bool CanPlatnCrop() {
-        return true;
+
+        return cropInventory > 0;
     }
 
     public void OnBuyCropButton(CropData cropData) {
